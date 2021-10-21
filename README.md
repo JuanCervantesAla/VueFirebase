@@ -1,4 +1,4 @@
-# AUTH autentificación
+# Storage
 
 ## Atención acuérdate de intalar los Módulos
 
@@ -7,333 +7,311 @@ Instala los modulos, vete a terminal, nuevo terminal y escribe:
 npm install
 ```
 
-## TEMPLATE Navbar
+## Obtener Imagen
 
-### Botones modales
+Antes de comenzar voy a cambiar copiar y pegar el archivo Home.vue a About.vue
 
-En componentes **Navbar** añadimos los botones para abrir los modales después de </form>:
+- Solo tenemos que modificar el nombre de en exportar
 
-```html
- <!-- Después de la etiqueta </form> --> 
- <!-- Iniciar sesión --> 
-<button type="button" class="btn btn-outline-primary mx-2" 
-  data-bs-toggle="modal" 
-  data-bs-target="#login">
-  Log in
-</button> 
- <!-- Cerrar sesión -->   
-<button class="btn btn-outline-danger me-2"
-  data-bs-toggle="modal" 
-  data-bs-target="#login"
-  @click="signout">
-  Log out
-</button>
- <!-- Regístrate --> 
-<button type="button" 
-  class="btn btn-outline-warning" 
-  data-bs-toggle="modal" 
-  data-bs-target="#registro"><!-- inicia modal con id="registro" --> 
-  Regístrate
-</button> 
+```js
+export default {
+  name: 'About',
 ```
-### Modal Regístrate
 
-Crea un formulario con:
-- Correo electrónico
-- Contraseña
-- Repita la contraseña
-- Botón de envío
+En Home.vue pegaremos **v-for** del componente **Cards** de Bootstrap y el método de obtenerDatos de Firestore.
+
+TEMPLATE CARDS
 
 ```html
-<!-- //// Modal - Registrarse //// -->
-<div class="modal fade" id="registro">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Regístrate</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form @submit.prevent="register( this.email, this.password )">  
-           <!-- CORREO -->
-          <div class="input-group mb-3">
-          <span class="input-group-text">Correo</span>
-          <input v-model="email" 
-                  type="email"
-                  required="true"
-                  class="form-control">
-          </div>
-          <!-- PASSWORD -->
-          <div class="input-group mb-3">
-          <span class="input-group-text">Password</span>
-          <input v-model="password" 
-                  type="password"
-                  required="true" 
-                  class="form-control">
-          </div>
-          <!-- REPASSWORD -->
-          <div class="input-group mb-3">
-          <span class="input-group-text">Repite Password</span>
-          <input v-model="repassword" 
-                  type="password"
-                  required="true" 
-                  class="form-control">
-          </div>
-          <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Registrar</button>
-          </div>
-        </form>
-      </div>
+<template>
+    <div>
+        <Navbar/>
+        <div class="container my-5">
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div class="col" v-for="(item, index) in usuarios" :key="index">
+                    <div class="card">
+                    <img :src= "item.foto" class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title"> {{item.nombre}}</h5>
+                        <p class="card-text"> {{item.correo}}</p>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
+</template>
 ```
 
-### Modal iniciar sesión
-
-Crea un formulario con:
-- Correo electrónico
-- Contraseña
-- Botón de envío
-
-```html
-<!-- //// Modal - Iniciar sesión //// -->
-<div class="modal fade" id="login">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Inicia de sesión</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form @submit.prevent="login( this.email, this.password )">
-          <!-- CORREO --> 
-          <div class="input-group mb-3">
-          <span class="input-group-text">Correo</span>
-          <input v-model="email" 
-                  type="email"
-                  required="true"
-                  class="form-control">
-          </div>
-          <!-- PASSWORD --> 
-          <div class="input-group mb-3">
-          <span class="input-group-text">Password</span>
-          <input v-model="password" 
-                  type="password"
-                  required="true" 
-                  class="form-control">
-          </div>
-          <div class="d-grid gap-2">
-            <button type="submit" 
-              class="btn btn-primary" 
-              data-bs-dismiss="modal"><!-- Cierra el modal --> 
-              Iniciar sesión
-            </button>
-          </div>
-          </form>
-      </div>
-    </div>
-  </div>
-</div>
-```
-
-## SCRIPT Navbar 
-
-### Iniciar sesión, cerrar sesión y registrase
-
-- Importamos **auth** de **firebase**
-- Creamos los datos **email** y **password**
-- Función register(), login() y logout()
+SCRIPT obtenerDatos / getDocs
 
 ```js
 <script>
-import { 
-  getAuth,
-  signOut,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
-  } from "firebase/auth";
-
+import Navbar from '../components/Navbar.vue'
+import { collection, getDocs } from 'firebase/firestore/lite';
+import { db } from "../main";
 export default {
-  name: 'Navbar',
-   data() {
-        return {
-            email: '',
-            password: '',
-            repassword: '',
-            errorMessage: ''
-        };
+    name: 'Home',
+    components: { 
+      Navbar,   
     },
-   methods: {
-     register(email, password) {
-        const auth = getAuth();
-        createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            const user = userCredential.user;
-            alert('¡Registrado!');
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            this.errorMessage = error.message;
-            alert(this.errorMessage);
-            // ..
-        });
-      },        
-     login( email, password ) {
-       const auth = getAuth();
-        signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            alert('¡Sesión iniciada!');
-            // Signed in
-            const user = userCredential.user;
-            // ...
-            })
-        .catch((error) => {
-        const errorCode = error.code;
-        this.errorMessage = error.message;
-        alert(this.errorMessage);
-        });
-        },
-     signout () {
-       const auth = getAuth();
-      signOut(auth).then(() => {
-        alert('¡Sesión cerrada! Inicia sesión.');
-      }).catch((error) => {
+    data() {
+        return {
+          usuarios: [],
+          usuario: {
+            nombre: '',
+            correo: '',
+            foto: ''
+          }
+        }
+    },
+    methods:{
+  // GET
+    async obtenerDatos () { 
+      const querySnapshot = await getDocs(collection(db, "usuarios"));
+        querySnapshot.forEach((doc) => {
+        let usuario = doc.data()
+        usuario.id = doc.id
+        this.usuarios.push(usuario)
+        console.log(usuario)
       });
-     }
-   }
+    }
+    },
+    mounted() {
+        this.obtenerDatos();
+    },
 }
 </script>
 ```
 
-## USUARIO LOG IN
+### Template Obtener Imagen
 
-### onAuthStateChanged
-
-En el archivo **main.js** añade este código
-
-```js
-// Importa la funcion onAuthStateChanged
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-// Función 
-const auth = getAuth();
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log(user)
-      const usuarioActivo ={
-        email: user.email,
-        uid: user.uid
-      }
-     store.dispatch('detectarUsuario', usuarioActivo)
-     console.log(usuarioActivo)
-    // ...
-  } else {
-    console.log(user)
-    store.dispatch('detectarUsuario', user)
-    // User is signed out
-    // ...
-  } 
-});
-```
-## STORE
-
-### Actions / mutations / state/ getters
-
-Copia y pega en **/store/index.js**
-
-```js
-import { createStore } from 'vuex'
-
-export default createStore({
-  state: {
-    usuario: null,
-  },
-  mutations: {
-    setUsuario(state, payload){
-      state.usuario = payload
-    }
-  },
-  // Recibe datos de onAuthStateChanged (main.js)
-  actions: {
-    detectarUsuario({commit}, usuario){
-      commit('setUsuario', usuario)
-    }
-  },
-  // Devuelve true/false si existe un usuario
-  getters: {
-    existeUsuario(state){
-      if(state.usuario === null){
-        return false;
-      }else{
-        return true;
-      }
-    }
-  },
-  modules: {
-  }
-})
-```
-### ...mapGetters
-
-En el script:
-```js
-// Importamos mapGetters
-import { mapGetters } from 'vuex'
-// Añadimos en computed
-  computed: {
-    ...mapGetters(['existeUsuario'])
-  }
-```
-
-En el template del archvo ***Navbar.vue**
-
-En los botones:
-
-- Iniciar sesión añadimos **v-if="!existeUsuario"**
-- Cerrar sesión añadimos **v-if="existeUsuario"**
-- Registro añadimos **v-if="!existeUsuario"**
+En la parte de **template** añadimos un **input type="file"** que nos permite buscar un archivo a través del **finder** antes del botón **Guardar**.
 
 ```html
-<!-- Utilizamos v-if para mostrar/ocultar los botones --> 
- v-if="!existeUsuario"
+<div class="input-group my-3">
+    <input type="file" @change="buscarImagen($event)">
+</div>
 ```
-
-## MODIFICANDO LA BARRA DE NAVEGACIÓN
-
-Modifica la navegación cambiando los botones por:
+Si queremos previsualizar la imagen utilizamos el dato **datoImagen**, después del botón Guardar.
 
 ```html
-<!-- HOME -->
-<router-link class="nav-link active" aria-current="page" to="/">Home</router-link>
-<!-- ABOUT -->
-<router-link v-if="existeUsuario" class="nav-link active" aria-current="page" to="/about">About</router-link>
+<div class="mt-4">
+    <img :src="datoImagen">
+</div>
 ```
 
+### Script Obtener Imagen
 
-## RUTAS PROTEGIDAS
+- Buscar la imagen y guardarla en una variable **file** y el contenido **datoImagen**, y así visualizar el contenido de la imagen. Fíjate que también utilizamos un condicional para verificar que el tipo de archivo sea válido (jpeg, png). 
 
-### Router / requiresAuth
+DATA
 
-En el archivo **/router/indes.js** añadimos el código:
+Añadimos **file y datoImagen**
 
 ```js
-// Importamos auth
-import { getAuth } from "firebase/auth";
-// Añadimos el meta: a la ruta
-meta: {requiresAuth: true},
-// Incluimos la función
-router.beforeEach((to, from, next) => {
-  if(to.matched.some(record => record.meta.requiresAuth)){
-    const auth = getAuth();
-    const usuario = auth.currentUser;
-    console.log ('usuario desde router', usuario)
-    if(!usuario){
-      next({path: '/'})
-    }else{
-      next()
-    }
-  } else {
-    next()
-  }
-})
+data() {
+    return {
+      file: null,
+      datoImagen: null,
+}
 ```
+Obtenemos el archivo y lo guardamos en data, comprobamos el tipo de archivo si es válido y obtenemos la url para poder visualizarla en la página.
+
+FUNCIÓN
+
+```js
+ // BUSCAR IMAGEN
+buscarImagen(event){
+    console.log(event.target.files[0]);
+    const tipoArchivo = event.target.files[0].type;
+    if(tipoArchivo === 'image/jpeg' || tipoArchivo === 'image/png'){
+        this.file = event.target.files[0]
+        this.error = null
+    }
+        else{
+        this.error = 'Archivo no válido'
+        this.file = null
+        return 
+        }
+        const reader = new FileReader();
+        reader.readAsDataURL(this.file);
+        reader.onload = (e) => {
+        this.datoImagen = e.target.result
+        }
+},
+```
+
+## Botón Editar / obtenerDatoID
+
+### Template botón editar
+
+Con obtener dato por id podemos rellenar los campos del formulario para editar y actualizar los datos.
+
+Añadimos a la tabla la columna **Editar** después de **Correo**
+
+```html
+<th scope="col">Editar</th>
+```
+
+Añadimos en la fila el **botón Editar** antes del botón **Eliminar**
+
+```html
+<td>
+    <button @click.prevent="obtenerDatoID( item.id );this.editar = !this.editar;" 
+    class="btn btn-primary">Editar
+    </button>
+</td>
+```
+### Script Botón Editar
+
+DATA
+
+```js
+data() {
+    return {
+      editar: false,
+    }
+}
+```
+
+MÉTODO
+
+Importa **getDoc**
+
+Método obtenerDatoID [getDoc](https://firebase.google.com/docs/firestore/query-data/get-data)
+
+```js
+import { doc, getDoc } from "firebase/firestore";
+```
+
+```js
+// GET BY ID / OBTENER POR ID
+async obtenerDatoID (id){
+  const docRef = doc(db, "usuarios", id);
+  const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        this.usuario = docSnap.data()
+        this.usuario.id = docSnap.id
+        } 
+        else {
+        console.log("¡No existe el documento!");
+        }
+},
+```
+
+## Storage / subir imagen y guardar el enlace
+
+- Subir la imagen a **storage** y guardar la dirección/enlace en una variable.
+
+
+### Template botón Guardar / Editar
+
+Añadir botón Actualizar y mostrar / ocultar los botones **editar: false**
+
+```html
+<!-- Mostrar/Ocultar Botones Guardar-Editar -->
+<div class="mt-3">  
+  <button v-show="this.editar === true" 
+    @click.prevent="actualizarDato(id)" 
+    class="btn btn-primary">
+    Actualizar
+  </button>
+  <button v-show="this.editar === false" 
+    @click.prevent="subirDato()" 
+    class="btn btn-primary">
+    Guardar
+  </button>
+```
+
+### Importar Storage en main.js
+
+```js
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/storage';
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig)
+var storage = firebase.storage();
+
+export { db, storage };
+```
+
+### Script / subirImagenDatos / actualizarImagenDatos
+
+MÉTODO subirImagenDatos
+
+Importa Storage
+
+```js
+import { updateDoc } from 'firebase/firestore/lite';
+import { db, storage } from "../main";
+
+```
+
+
+```js
+// SUBIR IMAGEN STORAGE
+  async subirDato(){
+    try {
+      this.loading = true
+// Guarda el nombre del archivo de imagen
+      const refImagen = storage.ref().child('imagenes').child(this.file.name)
+// Guarda el archivo de la imagen
+      const res = await refImagen.put(this.file)
+      console.log(res);
+ // Descarga / devuelve el enlace a la imagen     
+      const urlDescarga = await refImagen.getDownloadURL()
+      await 
+        addDoc(collection(db, "usuarios"), {
+          nombre: this.usuario.nombre,
+          correo: this.usuario.correo,
+          foto: urlDescarga
+        })
+        this.error = 'Imagen subida con éxito'
+        this.file = null
+    } 
+      catch (error) {
+        console.log(error);
+      } 
+      finally {
+        router.push('/')
+        this.loading = false
+      }
+    },
+```
+MÉTODO actualizarImagenDatos
+
+```js
+// MÉTODO actualizarDato
+async actualizarDato(){
+    try {
+      this.loading = true
+// Guarda el nombre de la imagen
+      const refImagen = storage.ref().child('imagenes').child(this.file.name)
+// Guarda el archivo de la imagen
+      const res = await refImagen.put(this.file)
+      console.log(res);
+// Descarga el enlace a la imagen
+      const urlDescarga = await refImagen.getDownloadURL()
+// Actualizar datos en firestore
+      const elemento = doc(db, "usuarios", this.usuario.id );
+        await updateDoc(elemento, {
+          nombre: this.usuario.nombre,
+          correo: this.usuario.correo,
+          foto: urlDescarga
+        })
+        this.error = 'Imagen subida con éxito'
+        this.file = null
+    } 
+      catch (error) {
+        console.log(error);
+        al
+      } 
+      finally {
+
+        router.push('/')
+        this.loading = false
+      }
+    }
+```       

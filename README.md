@@ -239,7 +239,7 @@ export { db, storage };
 
 ### Script / subirImagenDatos / actualizarImagenDatos
 
-MÉTODO subirImagenDatos
+MÉTODO subirDato
 
 Importa Storage
 
@@ -280,7 +280,7 @@ import { db, storage } from "../main";
       }
     },
 ```
-MÉTODO actualizarImagenDatos
+MÉTODO actualizarDato
 
 ```js
 // MÉTODO actualizarDato

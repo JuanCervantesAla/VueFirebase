@@ -13,7 +13,6 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/storage';
 
-
 const firebaseConfig = {
   apiKey: "AIzaSyDF3MX2SzdanQXlOGWFudqTPjX37JJljDo",
   authDomain: "fir-3cd29.firebaseapp.com",
@@ -23,10 +22,9 @@ const firebaseConfig = {
   appId: "1:669805638608:web:2b40046fd5b4a7c52bbfd5"
 };
 
-
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig)
 var storage = firebase.storage();
-  // Initialize Firebase
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 

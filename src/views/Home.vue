@@ -7,8 +7,8 @@
                     <div class="card">
                     <img :src= "item.foto" class="card-img-top">
                     <div class="card-body">
-                        <h5 class="card-title"> {{item.nombre}}</h5>
-                        <p class="card-text"> {{item.correo}}</p>
+                        <h5 class="card-title text-center"> {{item.nombre}}</h5>
+                        <p class="card-text text-center"> {{item.correo}}</p>
                     </div>
                     </div>
                 </div>
@@ -21,8 +21,6 @@
 import Navbar from '../components/Navbar.vue'
 import { collection, getDocs } from 'firebase/firestore/lite';
 import { db } from "../main";
-
-
 export default {
     name: 'Home',
     components: { 
@@ -31,7 +29,6 @@ export default {
     data() {
         return {
           usuarios: [],
-
           usuario: {
             nombre: '',
             correo: '',

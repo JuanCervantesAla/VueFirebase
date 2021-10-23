@@ -218,7 +218,7 @@ Añadir botón Actualizar y mostrar / ocultar los botones **editar: false**
     Actualizar
   </button>
   <button v-show="this.editar === false" 
-    @click.prevent="subirDato()" 
+    @click.prevent="agregarDato()" 
     class="btn btn-primary">
     Guardar
   </button>
@@ -232,86 +232,68 @@ import 'firebase/compat/storage';
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig)
-var storage = firebase.storage();
+var storageRef = firebase.storage().ref();
 
-export { db, storage };
+export { db, storageRef };
 ```
 
 ### Script / subirImagenDatos / actualizarImagenDatos
 
-MÉTODO subirDato
+MÉTODO subirImagenDatos
 
 Importa Storage
 
 ```js
 import { updateDoc } from 'firebase/firestore/lite';
-import { db, storage } from "../main";
+import { db, storageRef} from "../main";
 
 ```
 
 
 ```js
 // SUBIR IMAGEN STORAGE
-  async subirDato(){
-    try {
-      this.loading = true
-// Guarda el nombre del archivo de imagen
-      const refImagen = storage.ref().child('imagenes').child(this.file.name)
-// Guarda el archivo de la imagen
-      const res = await refImagen.put(this.file)
-      console.log(res);
- // Descarga / devuelve el enlace a la imagen     
-      const urlDescarga = await refImagen.getDownloadURL()
-      await 
-        addDoc(collection(db, "usuarios"), {
-          nombre: this.usuario.nombre,
-          correo: this.usuario.correo,
-          foto: urlDescarga
-        })
-        this.error = 'Imagen subida con éxito'
-        this.file = null
+async agregarDato(){
+  try {
+    await storageRef.child('imagenes').child(this.file.name).put(this.file)
+    const urlDescarga = await storageRef.child('imagenes').child(this.file.name).getDownloadURL()
+    await addDoc(collection(db, "usuarios"), {
+        nombre: this.usuario.nombre,
+        correo: this.usuario.correo,
+        foto: urlDescarga
+      })
+      this.error = 'Imagen subida con éxito'
+      this.file = null
+  } 
+    catch (error) {
+      console.log(error);
     } 
-      catch (error) {
-        console.log(error);
-      } 
-      finally {
-        router.push('/')
-        this.loading = false
-      }
-    },
+    finally {
+      router.push('/')
+    }
+},
 ```
-MÉTODO actualizarDato
+MÉTODO actualizarImagenDatos
 
 ```js
 // MÉTODO actualizarDato
 async actualizarDato(){
-    try {
-      this.loading = true
-// Guarda el nombre de la imagen
-      const refImagen = storage.ref().child('imagenes').child(this.file.name)
-// Guarda el archivo de la imagen
-      const res = await refImagen.put(this.file)
-      console.log(res);
-// Descarga el enlace a la imagen
-      const urlDescarga = await refImagen.getDownloadURL()
-// Actualizar datos en firestore
-      const elemento = doc(db, "usuarios", this.usuario.id );
-        await updateDoc(elemento, {
-          nombre: this.usuario.nombre,
-          correo: this.usuario.correo,
-          foto: urlDescarga
-        })
-        this.error = 'Imagen subida con éxito'
-        this.file = null
+  try {
+    await storageRef.child('imagenes').child(this.file.name).put(this.file)
+    const urlDescarga = await storageRef.child('imagenes').child(this.file.name).getDownloadURL()
+    const elemento = doc(db, "usuarios", this.usuario.id )
+    await updateDoc(elemento, {
+        nombre: this.usuario.nombre,
+        correo: this.usuario.correo,
+        foto: urlDescarga
+      })
+      this.error = 'Imagen subida con éxito'
+      this.file = null
+  } 
+    catch (error) {
+      console.log(error);
     } 
-      catch (error) {
-        console.log(error);
-        al
-      } 
-      finally {
-
-        router.push('/')
-        this.loading = false
-      }
+    finally {
+      router.push('/')
     }
-```       
+}
+``` 

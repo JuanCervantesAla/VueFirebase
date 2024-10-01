@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "npx vue-cli-service serve",
     "build": "npx vue-cli-service build",
-    "start": "serve -s dist -l $PORT"
+    "start": "serve -s dist -l ${PORT}"
   },
   "dependencies": {
     "@popperjs/core": "^2.10.2",

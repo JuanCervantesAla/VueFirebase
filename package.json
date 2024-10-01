@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "serve": "npx vue-cli-service serve",
-    "build": "npx vue-cli-service build"
+    "build": "npx vue-cli-service build",
+    "start": "npm run serve"
   },
   "dependencies": {
     "@popperjs/core": "^2.10.2",
